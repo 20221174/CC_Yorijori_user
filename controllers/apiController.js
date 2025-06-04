@@ -28,8 +28,7 @@ exports.loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // passport-local-sequelize에서 제공하는 authenticate() 메서드 사용
-    const auth = User.authenticate(); // authenticate() 호출 → 함수 반환
+    const auth = User.authenticate();
 
     auth(email, password, (err, user, options) => {
       if (err) {
@@ -41,9 +40,20 @@ exports.loginUser = async (req, res) => {
         return res.status(401).json({ error: "Invalid email or password" });
       }
 
-      // 비밀번호, salt 등 민감 정보 제외하고 응답
-      const { password: pw, mysalt, ...userWithoutPassword } = user.dataValues;
-      return res.json(userWithoutPassword);
+      // 👇 Passport 세션에 유저 저장 → serializeUser 호출됨
+      req.login(user, (err) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Login failed" });
+        }
+
+        const {
+          password: pw,
+          mysalt,
+          ...userWithoutPassword
+        } = user.dataValues;
+        return res.json(userWithoutPassword);
+      });
     });
   } catch (error) {
     console.error(error);
