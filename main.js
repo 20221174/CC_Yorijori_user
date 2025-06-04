@@ -122,11 +122,14 @@ app.use((req, res, next) => {
 // Router
 const homeRouter = require("./routers/homeRouter.js");
 const authRouter = require("./routers/authRouter");
+const apiRouter = require("./routers/apiRouter.js");
 
 // home 접근
 app.use("/", homeRouter);
 // 로그인 및 사용자 관리 접근
 app.use("/auth", authRouter);
+// api
+app.use("/user-api", apiRouter);
 
 // Express 전역 변수를 설정하여 모든 EJS 템플릿에서 접근 가능하도록 함
 app.locals.domainName = process.env.DOMAIN_NAME;
