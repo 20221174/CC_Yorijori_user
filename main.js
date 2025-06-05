@@ -101,8 +101,19 @@ app.use((req, res, next) => {
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(User.createStrategy());
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.serializeUser((user, done) => {
+  // 원하는 정보 저장 (예: userId)
+  done(null, user.userId); // 또는 user.id 등
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findOne({ where: { userId: id } });
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
 
 app.use((req, res, next) => {
   res.locals.loggedIn = req.isAuthenticated();

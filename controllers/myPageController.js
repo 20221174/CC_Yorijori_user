@@ -8,7 +8,7 @@ module.exports = {
   //마이페이지 메인(게시글 보기)
   mypageMain: async (req, res) => {
     try {
-      let userId = res.locals.currentUser.getDataValue("userId");
+      let userId = res.locals.currentUser.userId;
 
       //   let query = `
       //             SELECT p.postId, p.title, p.userId, i.imageUrl
@@ -67,7 +67,7 @@ module.exports = {
   mypageScrap: async (req, res) => {
     try {
       //내가 저장한 게시글 목록 불러오기
-      let userId = res.locals.currentUser.getDataValue("userId");
+      let userId = res.locals.currentUser.userId;
       //   let query = `
       //             SELECT p.title, p.date, p.postId
       //             FROM saves s
@@ -117,7 +117,7 @@ module.exports = {
   mypageComment: async (req, res) => {
     try {
       //내가 단 댓글 목록 불러오기
-      let userId = res.locals.currentUser.getDataValue("userId");
+      let userId = res.locals.currentUser.userId;
       //   let query = `
       //                     SELECT p.title, c.content, c.createdAt, p.postId
       //                     FROM comments c
@@ -167,16 +167,22 @@ module.exports = {
   mypageMyFunding: async (req, res) => {
     try {
       //내가 연 펀딩 목록 불러오기
-      let userId = res.locals.currentUser.getDataValue("userId");
-      let query = `
-                        SELECT fg.representativeUserId, fg.fundingDate, fp.productName, fg.people, fp.imageUrl
-                        FROM fundingGroups AS fg
-                        INNER JOIN fundingProducts AS fp ON fg.fundingProductId = fp.fundingProductId
-                        where fg.representativeUserId = ${userId};
-            `;
-      let [myposts, metadata] = await sequelize.query(query, {
-        type: Sequelize.SELECT,
-      });
+      let userId = res.locals.currentUser.userId;
+      // let query = `
+      //                   SELECT fg.representativeUserId, fg.fundingDate, fp.productName, fg.people, fp.imageUrl
+      //                   FROM fundingGroups AS fg
+      //                   INNER JOIN fundingProducts AS fp ON fg.fundingProductId = fp.fundingProductId
+      //                   where fg.representativeUserId = ${userId};
+      //       `;
+      // let [myposts, metadata] = await sequelize.query(query, {
+      //   type: Sequelize.SELECT,
+      // });
+
+      const response = await axios.get(
+        `http://funding:3000/funding-api/fundings/${userId}`
+      );
+      const myposts = response.data;
+      console.log("Query Results:", myposts);
 
       // 날짜 출력 조정
       myposts.forEach((post) => {
@@ -211,17 +217,23 @@ module.exports = {
   mypageParticipatedFunding: async (req, res) => {
     try {
       //참여한 펀딩 불러오기
-      let userId = res.locals.currentUser.getDataValue("userId");
-      let query = `
-                        SELECT cp.userId, cp.fundingGroupId, fg.fundingDate, fg.people, fp.productName, fp.imageUrl
-                        FROM compositions AS cp
-                        INNER JOIN fundingGroups AS fg ON cp.fundingGroupId = fg.fundingGroupId
-                        INNER JOIN fundingProducts AS fp ON fg.fundingProductId = fp.fundingProductId
-                        where cp.userId = ${userId};
-            `;
-      let [myposts, metadata] = await sequelize.query(query, {
-        type: Sequelize.SELECT,
-      });
+      let userId = res.locals.currentUser.userId;
+      // let query = `
+      //                   SELECT cp.userId, cp.fundingGroupId, fg.fundingDate, fg.people, fp.productName, fp.imageUrl
+      //                   FROM compositions AS cp
+      //                   INNER JOIN fundingGroups AS fg ON cp.fundingGroupId = fg.fundingGroupId
+      //                   INNER JOIN fundingProducts AS fp ON fg.fundingProductId = fp.fundingProductId
+      //                   where cp.userId = ${userId};
+      //       `;
+      // let [myposts, metadata] = await sequelize.query(query, {
+      //   type: Sequelize.SELECT,
+      // });
+
+      const response = await axios.get(
+        `http://funding:3000/funding-api/participated-fundings/${userId}`
+      );
+      const myposts = response.data;
+      console.log("Query Results:", myposts);
 
       // 날짜 출력 조정
       myposts.forEach((post) => {
